@@ -4,18 +4,13 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-
 import org.springframework.security.config.http.SessionCreationPolicy;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -28,40 +23,50 @@ public class SecurityConfig {
 
     private final JWTFilter jwtAuthenticationFilter;
 
-    // Constructor Injection
-    public SecurityConfig(
-            JWTFilter jwtAuthenticationFilter
-    ) {
+    public SecurityConfig(JWTFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http
-    ) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> {})
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll() 
-                        
+
+                        // Public APIs
+                        .requestMatchers(
+                                "/auth/**",
+                                "/public/**",
+
+                                // Swagger URLs
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml"
+                        ).permitAll()
+
+                        // Developer APIs
                         .requestMatchers("/developer/create")
-                        .hasAnyRole("USER","DEVELOPER")    
+                        .hasAnyRole("USER", "DEVELOPER")
 
                         .requestMatchers("/developer/update/**")
                         .hasRole("DEVELOPER")
- 
+
                         .requestMatchers("/developer/me/**")
-                        .hasAnyRole("DEVELOPER","HR")
-                        
-                        .requestMatchers("/admin/**").hasRole("HR")    
-                        
-                        .requestMatchers("/public/**").permitAll()
+                        .hasAnyRole("DEVELOPER", "HR")
+
+                        // Admin APIs
+                        .requestMatchers("/admin/**")
+                        .hasRole("HR")
+
+                        // Remaining APIs
                         .anyRequest()
-                        .authenticated() 
+                        .authenticated()
                 )
 
                 .addFilterBefore(
@@ -79,11 +84,11 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config
-    ) throws Exception {
+            AuthenticationConfiguration config) throws Exception {
 
         return config.getAuthenticationManager();
     }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
