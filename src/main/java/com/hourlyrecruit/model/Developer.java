@@ -25,6 +25,7 @@ public class Developer {
 
     private String linkedinUrl;
 
+
     @Enumerated(EnumType.STRING)
     private DeveloperCategory category;
     @OneToOne
