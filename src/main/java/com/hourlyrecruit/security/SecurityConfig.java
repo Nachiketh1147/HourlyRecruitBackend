@@ -42,6 +42,11 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/auth/**",
                                 "/public/**",
+                                "/auth/login",
+                                "/auth/register",
+                                "/auth/send-otp",
+                                "/auth/verify-otp",
+                                "/auth/refresh",
 
                                 // Swagger URLs
                                 "/swagger-ui/**",
