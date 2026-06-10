@@ -21,7 +21,7 @@ public class CorsConfig {
         // Allowed Frontend URLs
         config.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000",
-                "http://localhost:5173",
+                "http://localhost:*",
                 "https://hourlyrecruit.vercel.app"
         ));
 
